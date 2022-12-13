@@ -10,9 +10,8 @@ import {
     LogLevel,
     VendureConfig,
 } from '@vendure/core';
-import { ElasticsearchPlugin } from '@vendure/elasticsearch-plugin';
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
-import { BullMQJobQueuePlugin } from '@vendure/job-queue-plugin/package/bullmq';
+import { StripePlugin } from '@vendure/payments-plugin/package/stripe';
 import path from 'path';
 import { ConnectionOptions } from 'typeorm';
 
@@ -39,8 +38,9 @@ export const devConfig: VendureConfig = {
     },
     authOptions: {
         disableAuth: false,
-        tokenMethod: ['bearer', 'cookie'] as const,
-        requireVerification: true,
+        // tokenMethod: ['bearer', 'cookie'] as const,
+        tokenMethod: 'bearer',
+        requireVerification: false,
         customPermissions: [],
         cookieOptions: {
             secret: 'abc',
@@ -90,11 +90,19 @@ export const devConfig: VendureConfig = {
             route: 'admin',
             port: 5001,
         }),
+        StripePlugin.init({
+            apiKey: process.env.YOUR_STRIPE_SECRET_KEY || 'sk_test_eUKKviA6p43i3vgCrwJeQnw4',
+            webhookSigningSecret:
+                process.env.YOUR_STRIPE_WEBHOOK_SIGNING_SECRET ||
+                'whsec_adc72aa570dbe9bdf93a59b5f3821cf409b57597d5b04e0f54de9be1b8dd454f',
+            // This prevents different customers from using the same PaymentIntent
+            storeCustomersInStripe: true,
+        }),
     ],
 };
 
 function getDbConfig(): ConnectionOptions {
-    const dbType = process.env.DB || 'mysql';
+    const dbType = process.env.DB || 'sqlite';
     switch (dbType) {
         case 'postgres':
             console.log('Using postgres connection');

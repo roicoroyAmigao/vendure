@@ -92,5 +92,9 @@
       "pre-commit": "lint-staged",
       "pre-push": "yarn check-imports && yarn check-angular-versions && yarn build && yarn test && yarn e2e"
     }
+  },
+  "dependencies": {
+    "@vendure/payments-plugin": "^1.8.3",
+    "stripe": "^10.17.0"
   }
 }
